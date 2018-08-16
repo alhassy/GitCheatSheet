@@ -1,0 +1,347 @@
+#+TITLE: Reference Sheet for Git
+# SUBTITLE: Cheat Sheet Template
+# DATE: << Spring 2018 >>
+# When we don't provide a date, one is provided for us.
+#+AUTHOR: [[http://www.cas.mcmaster.ca/~alhassm/][Musa Al-hassy]]
+#+EMAIL: alhassy@gmail.com
+#+DESCRIPTION: This document is written by Musa Al-hassy for his learning in the spring of 2018.
+#+STARTUP: hideblocks
+#+STARTUP: overview
+#+TODO: BEGIN-IGNORE(b) END-IGNORE(e) } | DONE(d)
+# (setq org-latex-pdf-process '("pdflatex %f"))
+
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage{newunicodechar}
+#+LATEX_HEADER: \newunicodechar{⟨}{\ensuremath{\langle}}
+#+LATEX_HEADER: \newunicodechar{⟩}{\ensuremath{\rangle}}
+
+# This needs to be below the unicode stuff, otherwise the unicode wont work.
+#+INCLUDE: CheatSheet/CheatSheetSetup.org
+
+* Workflow $⟨$
+
+/--Getting things done--/
+
+0. Create a branch, say off of Master.
+1. Work :: Make branches, make commits, push and pull changes, review history.
+2. Merge it back to the parent, e.g., Master, when done.
+
+* Getting started
+
+Insist that our Git related actions will be stamped by our identifiying information,
+so that it's clear what we did.
+#+BEGIN_SRC shell
+git config --global user.name "⟨My Name⟩"
+git config --global user.email ⟨myEmail@example.com⟩
+
+# Add our GitHub username to our configuration, this is case sensative.
+git config --global user.username ⟨userName⟩
+
+# Open the global configuration file in a text editor for manual editing.
+git config --global --edit
+#+END_SRC
+#
+# [[https://stackoverflow.com/a/21865319/3550444][Possibly also look at pushing all branches versus each individually.]]
+#
+# git config --global push.default simple
+
+# See the value of each of these fields by invoking them without the final argument.
+
+* Branches
+/--Group changes by naming a series of commits and combining completed efforts--/
+
+When contributing, work on a branch: A copy of the original project, with its own history
+and its changes are isolated from the original, until it's merged back into the original branch 
+--which is commonly called “master”.
+
+Do so to avoiding stepping on another contributor's efforts, or having them step on yours,
+and also an excellent idea for experimenting: When unsure what's best, experiment on separate branches
+then compare your approaches. --we can even branch off of any branch!
+
++ git branch ⟨branch⟩ :: Create a new branch which is a copy of the current branch.
+     - Omitting any name yields the branches available; ~git branch -a~ shows all branches
+       including remote ones. The current branch is marked with an asterisk.
+
++ git checkout ⟨branch⟩ :: Switch to a given branch.
+  - Create and check out a new branch with ~git checkout -b ⟨name⟩~.
+
++ git merge :: We apply the changes of the current branch to its parent branch.
+
++ git branch -d ⟨branch⟩ :: When a branch is no longer needed, and has been merged, we delete it.
++ git branch -m ⟨newBranchName⟩ :: Rename the branch we're currently on.
+
+* Making Changes
+/Review edits and craf a commit transaction/
+
+A commit represents the state of our repository at a given point in time.
+It's like a snapshot, which we can go back to and see how thing were when we took it.
+#
+# Commits are core to using Git. 
+# They are the moments in which you save and describe the work you've done. 
+# They are the ticks in the timeline of your project's history.
+#
+
++ git add ⟨file⟩ :: Snapshots the file in preparation for versioning
++ git diff :: Shows file differences not yet staged.
+	      # Show unstaged changes.
++ git diff --staged :: Shows file differences between staging and the last file version
++ git status :: Show information about the current state of the repository:
+		What is the current branch, is everything up to date, what's new, what's changed.
++ git commit -m "⟨descriptive message⟩" :: Records file snapshots permanently in version history
++ git show ⟨commit⟩ :: To see what was new in a commit we can run ~git show commit-id-here~.
+
+* Undoing Changes
+
+Git allows us to return any selected file back to the way it was in a certain commit.
+
++ git checkout ⟨commit⟩ ⟨file⟩ :: Reverse everything done to a file to since the given commit.
+
+Erase mistakes and craf replacement history in /local/ work.
++ git reset --hard ⟨commit⟩ :: Discards all history and changes back to the specified commit
++ git reset ⟨commit⟩ :: Undoes all commits afer ⟨commit⟩, preserving changes locally
++ git reset ⟨file⟩ :: Unstages the file, but preserve its contents
+
+For changes already pushed, we use ~git revert~ which undoes the changes of a given commit.
++ git revert HEAD :: The newest commit can be accessed by the ~HEAD~ alias.
+  - For other commits it's best to use an id; e.g., ~git revert b10cc123.~
+
+* Refactoring Filenames
+Relocate and remove versioned files
++ git rm ⟨file⟩ :: Deletes the file from the working directory and stages the deletion
++ git rm --cached ⟨file⟩ :: Removes the file from version control but preserves the file locally
++ git mv ⟨file-original⟩ ⟨file-renamed⟩ :: Changes the file name and prepares it for commit
+
+* What changed? --Reviewing our history
+/Browse and inspect the evolution of project files/
+
++ git whatchanged :: Display the entire commit history along with which files were altered in each commit.
++ git log --oneline :: Lists version history for the current branch in one line for each commit.
++ git log --author=“⟨pattern⟩” :: Search for commits by a particular author.
++ git log -p :: Display the full diff of each commit.
++ git log --grep=“⟨pattern⟩” :: Search for commits with a commit message that matches ⟨pattern⟩.
++ git log -- ⟨file⟩ :: Only display commits that have the specified file.
+  # + git log --follow ⟨file⟩ :: Lists version history for a file, including renames
+
+
+* BEGIN-IGNORE bye :ignore:
+\iffalse
+
+* Setting up .gitignore
+In most projects there are files or entire folders that we don't want to ever commit. We can make sure that they aren't accidentally included in our git add -A by creating a .gitignore file:
+
+Manually create a text file called .gitignore and save it in your project's directory.
+Inside, list the names of files/directories to be ignored, each on a new line.
+The .gitignore itself has to be added, committed and pushed, as it is just like any other file in the project.
+Good examples for files to be ignored are:
+
+log files
+task runner builds
+the node_modules folder in node.js projects
+folders created by IDEs like Netbeans and IntelliJ
+personal developer notes
+A .gitignore banning all of the above will look like this:
+#+BEGIN_EXAMPLE
+*.log
+build/
+node_modules/
+.idea/
+my_notes.txt
+#+END_EXAMPLE
+The slash at the end of some of the lines signals that this is a folder and we are ignoring everything inside it recursively. The asterisk serves it's usual function as a wild card.
+
+** SUPPRESS TRACKING
+ Exclude temporary files and paths
+ #+BEGIN_EXAMPLE
+*.log
+build/
+temp-*
+ #+END_EXAMPLE
+ A text file named .gitignore suppresses accidental versioning of
+ files and paths matching the specified paterns
+
+* Basics
+
++ git init ⟨dir⟩ :: Mark the given directory for version control by git.
++ git clone ⟨repo-url⟩ :: Make a local copy of a repository.
+     Downloads a project and its entire version history
+
+* Social Coding
+
+Working with others is one of the best things about GitHub because it is easier to work from any place or timezone with someone else.
+
+Collaborators are other GitHub users who are given permission to make edits to a repository owned by someone else. You may also hear the term contributors, this describes another GitHub user who have made contributions, through a Fork and Pull Request, to a project.
+
+To add collaborators to one of your projects, visit the repository's page on your GitHub account and click the 'Settings' tab in the menu in the upper part of the page. Then select the 'Collaborators' option. Type the username into the text box add and click 'Add'.
+
+
+See changes to the remote before you pull in
+git fetch --dry-run
+
+* SYNCHRONIZE CHANGES
+Register a repository bookmark and exchange version history
++ git fetch ⟨bookmark⟩ :: Downloads all history from the repository bookmark
++ git merge ⟨bookmark⟩/⟨branch⟩ :: Combines bookmark’s branch into current local branch
++ git push ⟨alias⟩ ⟨branch⟩ :: Uploads all local branch commits to GitHub
++ git pull :: Downloads bookmark history and incorporates changes
+
+** Remotes
+
+ + git fetch <remote> <branch> :: 
+   Fetches a specific <branch>, from the repo. Leave off <branch> to
+   fetch all remote refs.
+
+ + git pull <remote> :: Fetch the specified remote’s copy of current branch and immediately
+    merge it into the local copy.
+
+ + git push ⟨remote⟩ ⟨branch⟩ :: Push the branch to <remote>, along with necessary commits and
+    objects. Creates named branch in the remote repo if it doesn’t exist.
+
+** Push Work to your Remote
+
+ Next you want to push (send) everything you've done locally to your remote repository on GitHub. This is something you'll do often so that your remote version is up to date and matching the state of your local version.
+
+ Git has a branching system so that you can work on different parts of a project at different times. We'll learn more about that later, but by default the first branch is named 'master'. When you push (and later pull) from a project, you tell Git the branch name you want and the name of the remote that it lives on.
+
+ In this case, we'll send our branch named 'master' to our remote on GitHub named 'origin'.
+
+ git push origin master
+** etc
+
+ Pull in changes:
+ git pull <REMOTENAME> <BRANCHNAME>
+
+ Push changes:
+ git push <REMOTENAME> <BRANCH>
+* forks
+
+When you fork a repository, you're creating a copy of it on your GitHub account. Your forked copy begins its life as a remote repository—it exists just on your GitHub account, not on your computer. Forks are used for creating your own version of a project (this diversion from the original is like taking a fork in the road) or contributing back your changes (such as bug fixes or new features) to the original project.
+
+When you push (and later pull) from a project, you tell Git the branch name you want and the name of the remote that it lives on.
+
+Add remote connections:
+git remote add <REMOTENAME> <URL>
+
+Pull in changes:
+git pull <REMOTENAME> <BRANCHNAME>
+
+** Connect to the Original Repository
+
+What if the original repository you forked happens to change? You'll want to be able to pull in those changes too. So let's add another remote connection, this time to the original, github.com/jlord/patchwork, repository with its URL.
+
+You can name this remote connection anything you want, but typically people use the name 'upstream'; let's use that for this.
+
+git remote add upstream https://github.com/jlord/patchwork.git
+
+To be sure you have the correct remotes set up, type git remote -v to list out the addresses you have stored. You should have an 'origin' remote with your fork's address and then an 'upstream' remote with the address to the original, the URL noted above in this step.
+
+
+View remote connections:
+git remote -v
+
+** pull requests
+
+ Pull Requests
+
+ Often when you make changes and improvements to a project you've forked, you'll want to send those changes to the maintainer of the original and request that they pull those changes into the original so that everyone can benefit from the updates—that's a pull request.
+
+
+ Create a pull request
+
+ Visit the original repository you forked on GitHub, in this case http://github.com/jlord/patchwork.
+
+ Often GitHub will detect if you've pushed a branch to a fork and display it at the top of the original's website. If you see that with your 'add-username' branch, you can click to create a Pull Request from there. 
+
+ You'll now see a page with the details of the pull request you're in the process of submitting. This page shows the commits and changes, in the form of a diff, associated with your pull request as compared to the 'gh-pages' branch of the original.
+
+ If the original repository has a contribution documentation, GitHub will link to it. This is documentation from repository owners on how to best make contributions to that project—very helpful to read if you'd like to see your changes adopted!
+
+ If everything on the page looks good and as you expect it:
+
+ Click 'Create pull request'
+ Add a title and description to the changes you're suggesting the original author pull in.
+ Click 'Send pull request'!
+ Bingo! You submitted a pull request—take a few seconds to bask in the moment.
+
+** PATCHWORK merging after pr accepted
+
+ Merge your branch locally, delete the branch and pull from upstream.
+ Cleaning up
+
+ Once you don't need branches anymore you can delete them locally and remotely. This is helpful so that you don't end up with a pile of old branches.
+ Merge Locally
+
+ Your pull request has been merged! Your branch was merged into the 'gh-pages' branch of the original on GitHub. You can merge your branch locally, too.
+
+ First, move into the branch you want to merge into—in this case, the branch 'gh-pages'.
+
+ git checkout gh-pages
+
+ Now tell Git what branch you want to merge in—in this case, your feature branch that begins with "add-".
+
+ git merge <BRANCHNAME>
+
+ Tidy up by deleting your feature branch. Now that it has been merged you don't really need it around.
+
+ git branch -d <BRANCHNAME>
+
+ You can also delete the branch from your remote on GitHub:
+
+ git push <REMOTENAME> --delete <BRANCHNAME>
+ Pull from Upstream
+
+ And last but not least, the original has changed since your pull request was merged—Reporobot added your name to the website! If you pull in these changes from upstream you'll be up to date and have that version too. You can actually see it live as well at: yourusername.github.io/patchwork.
+
+ To pull from the original upstream:
+
+ git pull upstream gh-pages
+
+* newpage :ignore:
+  \newpage
+
+* Git
+
++ Revert a file to a particular commit ::
+  ~git checkout 0cdf -- myfiles~
+     - Where ~0cdf~ is your commit identifier, which is usually much longer.
+
++ ~git whatchanged~ :: Like ~git log~ but informs exactly which files were altered.
+
+* Tutorials Consulted  
+
++ https://tutorialzine.com/2016/06/learn-git-in-30-minutes
++ https://www.atlassian.com/git/tutorials/atlassian-git-cheatsheet
++ Create useful .gitignore files for your project: https://www.gitignore.io/
+
++ [[https://github.com/jlord/git-it-electron/releases][Download]] the [[https://github.com/jlord/git-it-electron][Git-it]] desktop app to learn how to use git.
+  - You actually install and setup git and the app ensures you've done this!
+  - The challenges are actually checked rather than merely suggested.
+  - Also beginner friendly for those /unfamiliar/ with the command line!
+
++ https://choosealicense.com/
+  A license file is the type of license you put on your project. This lets others know how they can use it. Information on the types is here.
+
++ Pro Git Book, online. https://git-scm.com/book/en/v2
+
++ Git command reference https://git-scm.com/docs
+
++ Interactive tutorial: [[https://learngitbranching.js.org/][Learn Git Branching]]
+
++ Interactive tutorial: [[https://lab.github.com/][GitHub Learning Lab]]
+
++ https://learnxinyminutes.com/docs/git/
+
+
+
++ http://sethrobertson.github.io/GitBestPractices/    
+* END-IGNORE ye
+\fi
+
+* COMMENT footer
+
+(find-file "CheatSheet.el")
+
+# Local Variables:
+# eval: (org-babel-tangle)
+# eval: (load-file "CheatSheet.el")
+# compile-command: (my-org-latex-export-to-pdf)
+# End:
